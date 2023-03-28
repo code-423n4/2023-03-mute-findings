@@ -1,3 +1,12 @@
 G1. Define ``week_time`` and ``max_lock`` as public private constants to save gas. 
 
-https://github.com/code-423n4/2023-03-mute/blob/64521eff60cebca4d7c43f670bdc1414f8704fd0/contracts/dao/dMute.sol#L50-L51
+[https://github.com/code-423n4/2023-03-mute/blob/64521eff60cebca4d7c43f670bdc1414f8704fd0/contracts/dao/dMute.sol#L50-L51](https://github.com/code-423n4/2023-03-mute/blob/64521eff60cebca4d7c43f670bdc1414f8704fd0/contracts/dao/dMute.sol#L50-L51)
+
+G2. I don't see how multiplication by 1e18 and then division by 1e18 will help minimizing precision loss here. So maybe we can save gas instead:
+
+[https://github.com/code-423n4/2023-03-mute/blob/64521eff60cebca4d7c43f670bdc1414f8704fd0/contracts/dao/dMute.sol#L57](https://github.com/code-423n4/2023-03-mute/blob/64521eff60cebca4d7c43f670bdc1414f8704fd0/contracts/dao/dMute.sol#L57)
+
+```diff
+-  uint256 base_tokens = _amount.mul(_lock_time.mul(10**18).div(max_lock)).div(10**18);
++  uint256 base_tokens = (_amount.mul(_lock_time)).div(max_lock);
+```
