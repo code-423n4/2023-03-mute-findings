@@ -15,4 +15,13 @@ G3. No need to check these conditions, they will always be true. They can be eli
 
 [https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L99](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L99)
  
+G4. Here we only need to rest the time
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L105](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L105)
+
+```diff
+- _userLocks[msg.sender][index] = UserLockInfo(0,0,0);
++ _userLocks[msg.sender][index].time = 0;
+```
+
 
