@@ -11,7 +11,7 @@ G2. I don't see how multiplication by 1e18 and then division by 1e18 will help m
 +  uint256 base_tokens = (_amount.mul(_lock_time)).div(max_lock);
 ```
 
-G3. No need to check these conditions, they will always be true. They can be eliminated to save gas. L77 will also ensure they will be greater than zero.
+G3. No need to check these conditions, they will always be true. They can be eliminated to save gas. 
 
 [https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L99](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L99)
  
