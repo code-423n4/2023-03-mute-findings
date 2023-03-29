@@ -31,3 +31,7 @@ G5. Drop the first condition since it will be always true.
 + require(_mgmt_fee <= 1000, "MuteAmplifier: invalid _mgmt_fee");
 ```
 
+G6. This line can be eliminated since the check will always pass due to L205 and the checks in ``initializeDeposit()`` (L166). 
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L206](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L206)
+
