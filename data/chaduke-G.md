@@ -23,5 +23,11 @@ G4. Here we only need to rest the time
 - _userLocks[msg.sender][index] = UserLockInfo(0,0,0);
 + _userLocks[msg.sender][index].time = 0;
 ```
+G5. Drop the first condition since it will be always true.
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L139](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L139)
 
+```diff
+- require(_mgmt_fee >= 0 && _mgmt_fee <= 1000, "MuteAmplifier: invalid _mgmt_fee");
++ require(_mgmt_fee <= 1000, "MuteAmplifier: invalid _mgmt_fee");
+```
 
