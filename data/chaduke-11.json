@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "chaduke",
+  "risk": "3",
+  "title": "Inappropriate input of setMaxPayout() might freeze deposit() and the whole protocol from progressing in epochs.",
+  "issueId": 11,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/11"
+}
