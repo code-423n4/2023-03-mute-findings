@@ -44,3 +44,28 @@ G8. This safety check can be eliminated since we can infer ``epochStart <= block
 [https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L189-L190](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L189-L190)
 
 Consider how ``epochStart`` was calculated: The previous two lines show how to calculate ``epochStart``: 
+
+G9. ``fee0 <= totalFees0 && fee1 <= totalFees1`` are always going to be true, so there is no need to check them.
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L334-L342](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L334-L342)
+
+We can see that these two checks are always be true because totalFees0 and totalFees1 are changed ONLY at lines L116 and L117 of the update() function, and from the way that fee0 and fee1 are obtained in function ``_applyReward()``, ``fee0`` and ``fee1`` will always be a partial amount of ``totalFees0`` and ``totalFees1``. Therefore, the checks will always be true. There is no need to check. 
+
+In addition, checking them against balance of the two fees are not necessary either since the safeTransfer() will do that automatically.
+
+```diff
+- if ((fee0 > 0 || fee1 > 0) && fee0 <= totalFees0 && fee1 <= totalFees1) {
++        if(fee0 > 0){
+            address(IMuteSwitchPairDynamic(lpToken).token0()).safeTransfer(msg.sender, fee0);
++           totalClaimedFees0 = totalClaimedFees0.add(fee0);
++        }  
++        if(fee1 > 0) {
+            address(IMuteSwitchPairDynamic(lpToken).token1()).safeTransfer(msg.sender, fee1);
+
+-            totalClaimedFees0 = totalClaimedFees0.add(fee0);
+            totalClaimedFees1 = totalClaimedFees1.add(fee1);
++        }
+            emit FeePayout(msg.sender, fee0, fee1);
+        }
+``` 
+
