@@ -39,3 +39,9 @@ G7. There is no need for the if-condition since it is always be true due to the 
 
 [https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L233-L237](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L233-L237)
 
+G8. The check at L162 can be eliminated since it is implied by the next check at L163.
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L162-L163](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L162-L163)
+
+This is because: if ``payout <= maxDeposit()``, and we have ``maxDeposit() = maxPayout.sub(terms[epoch].payoutTotal)``, we can conclude  ``payout <= maxPayout``.
+
