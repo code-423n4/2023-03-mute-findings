@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "chaduke",
+  "risk": "2",
+  "title": "deposit() might fail to enforce the minimum ``payout`` constraint near the end of an epoch.",
+  "issueId": 8,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/8"
+}
