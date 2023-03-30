@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "HollaDieWaldfee",
+  "risk": "2",
+  "title": "MuteBond.sol: deposit function reverts if remaining payout is very small due to >0 check in dMute.LockTo function",
+  "issueId": 7,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/7"
+}
