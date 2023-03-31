@@ -69,3 +69,8 @@ In addition, checking them against balance of the two fees are not necessary eit
         }
 ``` 
 
+G10. This line can be eliminated since the next line will check this condition anyway (``transferFrom()``).
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L69](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L69)
+
+
