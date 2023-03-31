@@ -23,4 +23,17 @@ QA2. It is important to add ``require(_maxPrice >= _startPrice, "starting price 
 
 [https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L99-L113](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L99-L113)
 
+QA3. There is no sanity check for the input of ``setBondTimeLock()``. With inappropriate input, the protocol will break. For example, the ``timeToTokens()`` restricts the _lock_time to be between 1 week and 52 weeks. As a result, when ``_lock`` is set to be out of this range, the whole protocol will break.
 
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L139-L143](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L139-L143)
+
+Mitigation: to be consistent, introduce the same range check for ``setBondTimeLock()``:
+```diff
+
+function setBondTimeLock(uint _lock) external {
+        require(msg.sender == customTreasury.owner());
++       require(_lock >= 1 weeks && _lock <= 52 weeks) revert _lockOutOfRange(); 
+        bond_time_lock = _lock;
+        emit BondLockTimeChanged(_lock);
+    }
+```
