@@ -37,3 +37,31 @@ function setBondTimeLock(uint _lock) external {
         emit BondLockTimeChanged(_lock);
     }
 ```
+
+QA3. There is a division-before-multiplication precision loss issue with ``timeToTokens()``
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L49-L62](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L49-L62)
+
+The problem lies in the following line:
+
+```javascript
+        uint256 base_tokens = _amount.mul(_lock_time.mul(10**18).div(max_lock)).div(10**18);
+```
+
+It has a division first: 
+
+```javascript
+_lock_time.mul(10**18).div(max_lock)
+```
+which has a precision loss up to ``max_lock = 3.145e7``. 
+
+Then multiplication here:
+```javascipt
+_amount.mul(_lock_time.mul(10**18).div(max_lock))
+```
+
+Mitigation: use multiplication before division as follows:
+```diff
+- uint256 base_tokens = _amount.mul(_lock_time.mul(10**18).div(max_lock)).div(10**18);
++ uint256 base_tokens = _amount.mul(_lock_time).div(max_lock);
+```
