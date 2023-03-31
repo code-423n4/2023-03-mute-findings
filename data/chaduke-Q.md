@@ -17,3 +17,10 @@ if (reward > 0) {
 +           emit Payout(msg.sender, reward, remainder);    
         }
 ```
+
+QA2. It is important to add ``require(_maxPrice >= _startPrice, "starting price < min") `` to both ``setMaxPrice()`` and ``setStartPrice()``. Otherwise, if the constraint is violated, the protocol will break. For example, ``bondPrice()`` will always fail. 
+
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L99-L113](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L99-L113)
+
+
