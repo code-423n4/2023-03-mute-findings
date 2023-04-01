@@ -65,3 +65,36 @@ Mitigation: use multiplication before division as follows:
 - uint256 base_tokens = _amount.mul(_lock_time.mul(10**18).div(max_lock)).div(10**18);
 + uint256 base_tokens = _amount.mul(_lock_time).div(max_lock);
 ```
+
+QA4: rescueTokens() cannot rescue muteTokens when ``totalStakers == 0``.
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L186-L](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L186-L190)
+
+The if-condition creates the problem:
+```javascript
+  if (totalStakers > 0) {
+                require(amount <= IERC20(muteToken).balanceOf(address(this)).sub(totalRewards.sub(totalClaimedRewards)),
+                    "MuteAmplifier::rescueTokens: that muteToken belongs to stakers"
+                );
+            }
+```
+
+Mitigation:
+```
+function rescueTokens(address tokenToRescue, address to, uint256 amount) external virtual onlyOwner nonReentrant {
+        if (tokenToRescue == lpToken) {
+            require(amount <= IERC20(lpToken).balanceOf(address(this)).sub(_totalStakeLpToken),
+                "MuteAmplifier::rescueTokens: that Token-Eth belongs to stakers"
+            );
+        } else if (tokenToRescue == muteToken) {
+-            if (totalStakers > 0) {
+                require(amount <= IERC20(muteToken).balanceOf(address(this)).sub(totalRewards.sub(totalClaimedRewards)),
+                    "MuteAmplifier::rescueTokens: that muteToken belongs to stakers"
+                );
+-           }
+        }
+
+        IERC20(tokenToRescue).transfer(to, amount);
+    }
+```
+
