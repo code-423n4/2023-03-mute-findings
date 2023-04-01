@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "HollaDieWaldfee",
+  "risk": "2",
+  "title": "MuteAmplifier.sol: rescueTokens function does not prevent fee tokens from being transferred",
+  "issueId": 18,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/18"
+}
