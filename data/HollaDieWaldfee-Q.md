@@ -95,22 +95,32 @@ So ownership of the contract can easily be lost when making a mistake when trans
 Consider using the `Ownable2Step` contract from OZ ([https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable2Step.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable2Step.sol)) instead.  
 
 ## [L-05] Check that staking cannot occur when `endTime` is reached
-The [`MuteAmplifier.stake`](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L203-L223) function should require that the current timestamp is smaller than `endTime`.  
+The [`MuteAmplifier.stake`](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L203-L223) function should require that the current timestamp is smaller than `endTime` even when the call to `stake` is the first that ever occurred.  
+Currently the check is only made in the case that the call to `stake` is not the first.  
+The check should be made in both cases.  
 This is because when staking occurs when `block.timestamp >= endTime`, no rewards will be paid out. Additionally the user needs to pay the management fee on his `LP token` stake. So there is really no point in allowing users to do it because it only hurts them.  
 
 Fix:  
 ```diff
 diff --git a/contracts/amplifier/MuteAmplifier.sol b/contracts/amplifier/MuteAmplifier.sol
-index 9c6fcb5..8fc163d 100644
+index 9c6fcb5..460c408 100644
 --- a/contracts/amplifier/MuteAmplifier.sol
 +++ b/contracts/amplifier/MuteAmplifier.sol
-@@ -202,6 +202,7 @@ contract MuteAmplifier is Ownable{
+@@ -202,13 +202,12 @@ contract MuteAmplifier is Ownable{
       */
      function stake(uint256 lpTokenIn) external virtual update nonReentrant {
          require(lpTokenIn > 0, "MuteAmplifier::stake: missing stake");
 +        require(block.timestamp < endTime, "MuteAmplifier::stake: staking is over");
          require(block.timestamp >= startTime && startTime !=0, "MuteAmplifier::stake: not live yet");
          require(IERC20(muteToken).balanceOf(address(this)) > 0, "MuteAmplifier::stake: no reward balance");
+ 
+         if (firstStakeTime == 0) {
+             firstStakeTime = block.timestamp;
+-        } else {
+-            require(block.timestamp < endTime, "MuteAmplifier::stake: staking is over");
+         }
+ 
+         lpToken.safeTransferFrom(msg.sender, address(this), lpTokenIn);
 ```
 
 ## [N-01] Remove `require` statements that are always true
