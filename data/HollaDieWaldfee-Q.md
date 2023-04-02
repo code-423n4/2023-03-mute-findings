@@ -7,6 +7,10 @@
 | L-03      | Replicate price checks from constructor in setter functions | MuteBond.sol | 2 |
 | L-04      | Ownable: Does not implement 2-Step-Process for transferring ownership | MuteAmplifier.sol | 1 |
 | L-05      | Check that staking cannot occur when `endTime` is reached | MuteAmplifier.sol | 1 |
+| L-06      | Only allow rescuing `MUTE` rewards when `endTime` is reached | MuteAmplifier.sol | 1 |
+| L-07      | First user that stakes again after a period without stakers receives too many rewards | MuteAmplifier.sol | 1 |
+| L-08      | `dripInfo` function reverts when `firstStakeTime >= endTime` | MuteAmplifier.sol | 1 |
+| L-09      | `dripInfo` function does not calculate `fee0` and `fee1` in the `else` block | MuteAmplifier.sol | 1 |
 | N-01      | Remove `require` statements that are always true | dMute.sol | 2 |
 | N-02      | Remove `SafeMath` library | - | 3 |
 | N-03      | Event parameter names are messed up | MuteBond.sol | - |
@@ -121,6 +125,114 @@ index 9c6fcb5..460c408 100644
          }
  
          lpToken.safeTransferFrom(msg.sender, address(this), lpTokenIn);
+```
+
+## [L-06] Only allow rescuing `MUTE` rewards when `endTime` is reached
+The [`MuteAmplifier.rescueTokens`](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L180-L194) function allows the `owner` to rescue any tokens from the contract.  
+In the case of `MUTE` it is checked if `totalStakers > 0`, i.e. if there are any stakers.  
+If there are stakers then only tokens in excess of rewards can be rescued.  
+If there are no stakers, all `MUTE` tokens can be rescued.  
+I argue that this behavior does not what is intended. The issue is that there might just temporarily be no stakers but the `endTime` is not reached yet. This means the contract should be able to payout rewards.  
+
+A user that stakes when there are no `MUTE` rewards (there must still be a small excess balance of `MUTE`, e.g. sent by an attacker with griefing intent, to pass [this](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L206) check in the stake function) must send `MUTE` to the contract in order to be able to `withdraw` again. Otherwise an amount of `MUTE` is attempted to be transferred that is not held in the contract.  
+
+Based on the limited privileges the `owner` has I don't think the behavior described above is what is intended.  
+
+So I recommend that the `rescueTokens` function should not allow rescuing `MUTE` rewards within the `startTime` and `endTime` at all.  
+
+Fix:  
+```diff
+diff --git a/contracts/amplifier/MuteAmplifier.sol b/contracts/amplifier/MuteAmplifier.sol
+index 9c6fcb5..55ee81b 100644
+--- a/contracts/amplifier/MuteAmplifier.sol
++++ b/contracts/amplifier/MuteAmplifier.sol
+@@ -183,7 +183,7 @@ contract MuteAmplifier is Ownable{
+                 "MuteAmplifier::rescueTokens: that Token-Eth belongs to stakers"
+             );
+         } else if (tokenToRescue == muteToken) {
+-            if (totalStakers > 0) {
++            if (block.timestamp >= startTime && startTime !=0 && block.timestamp < endTime) {
+                 require(amount <= IERC20(muteToken).balanceOf(address(this)).sub(totalRewards.sub(totalClaimedRewards)),
+                     "MuteAmplifier::rescueTokens: that muteToken belongs to stakers"
+                 );
+```
+
+Note: I submitted a similar report that deals with rescuing fee tokens as "Medium" severity. I did this because in the case of rescuing fee tokens it affects EXISTING stakers. Here it affects only stakers that stake AFTER the tokens have been rescued.  
+
+## [L-07] First user that stakes again after a period without stakers receives too many rewards
+The `MuteAmplifier` contract pays out rewards on a per second basis.  
+Let's assume there is only 1 staker which is Bob.  
+
+Say Bob calls `stake` at `timestamp 0` and calls `withdraw` at `timestamp 10`. He receives rewards for 10 seconds of staking.  
+
+At `timestsamp 30` Bob calls `stake` again (there were no stakers from `timestamp 10` to `timestamp 30`).  
+If Bob calls `withdraw` at say `timestamp 40`, he receives not only rewards for the 10 seconds he has staked but for 30 seconds (`timestamp 10` to `timestamp 40`).  
+
+This means that whenever there are temporarily no stakers, whoever first stakes again receives all the rewards from the previous period without stakers.  
+
+This is due to how the [`update`](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L88-L121) modifier works.  
+
+When someone stakes and there were no other stakers, the [`if`](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L95-L118) block is not entered and the [`_mostRecentValueCalcTime`](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L109) variable is not updated.  
+
+So when the `update` modifier is executed again the staker also receives the rewards from the period when there were no stakers.  
+
+I just want to make the sponsor aware of this behavior. The sponsor may decide that this is unintended and needs to change. I think this might even be a beneficial behavior because it incentivises users to stake if there are no stakers because they will get more rewards.  
+
+## [L-08] `dripInfo` function reverts when `firstStakeTime >= endTime`
+It is unlikely but possible that `firstStakeTime >= endTime`.  
+I suggest in `[L-05]` that staking should only occur when `block.timestamp < endTime` which would mitigate this issue as well. But for now this issue exists.  
+
+So when `firstStakeTime >= endTime`, the following line in the `dripInfo` function reverts:  
+
+[Link](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L419)  
+```solidity
+info.perSecondReward = totalRewards.div(endTime.sub(firstStakeTime));
+```
+
+The current behavior can cause DOS issues in any components that make use of this function.  
+
+I recommend to either implement the changes in `[L-05]` or to implement the following:  
+
+```diff
+diff --git a/contracts/amplifier/MuteAmplifier.sol b/contracts/amplifier/MuteAmplifier.sol
+index 9c6fcb5..415da7f 100644
+--- a/contracts/amplifier/MuteAmplifier.sol
++++ b/contracts/amplifier/MuteAmplifier.sol
+@@ -416,7 +416,11 @@ contract MuteAmplifier is Ownable{
+      */
+     function dripInfo(address user) external view returns (DripInfo memory info) {
+ 
+-        info.perSecondReward = totalRewards.div(endTime.sub(firstStakeTime));
++        if (endTime > firstStakeTime) {
++            info.perSecondReward = totalRewards.div(endTime.sub(firstStakeTime));
++        } else {
++            info.perSecondReward = 0;
++        }
+         info.totalLP = _totalStakeLpToken;
+         info.multiplier_current = calculateMultiplier(user, false);
+         info.multiplier_last = calculateMultiplier(user, true);
+```
+
+## [L-09] `dripInfo` function does not calculate `fee0` and `fee1` in the `else` block
+In the `else` block, the [`MuteAmplifier.dripInfo`](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L417-L460) function does not calculate the value for `info.fee0` and `info.fee1`.  
+
+Fix:  
+
+```diff
+diff --git a/contracts/amplifier/MuteAmplifier.sol b/contracts/amplifier/MuteAmplifier.sol
+index 9c6fcb5..20974b8 100644
+--- a/contracts/amplifier/MuteAmplifier.sol
++++ b/contracts/amplifier/MuteAmplifier.sol
+@@ -455,6 +455,9 @@ contract MuteAmplifier is Ownable{
+           info.currentReward = totalUserStake(user).mul(_totalWeight.sub(_userWeighted[user])).div(info.multiplier_last);
+           // add back any accumulated rewards
+           info.currentReward = info.currentReward.add(_userAccumulated[user]);
++
++          info.fee0 = totalUserStake(user).mul(_totalWeightFee0.sub(_userWeightedFee0[user])).div(10**18);
++          info.fee1 = totalUserStake(user).mul(_totalWeightFee1.sub(_userWeightedFee1[user])).div(10**18);
+         }
+ 
+     }
 ```
 
 ## [N-01] Remove `require` statements that are always true
