@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "HollaDieWaldfee",
+  "risk": "3",
+  "title": "MuteAmplifier.sol: multiplier calculation is incorrect which leads to loss of rewards for almost all stakers",
+  "issueId": 19,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/19"
+}
