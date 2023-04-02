@@ -12,6 +12,7 @@
 | L-08      | `dripInfo` function reverts when `firstStakeTime >= endTime` | MuteAmplifier.sol | 1 |
 | L-09      | `dripInfo` function does not calculate `fee0` and `fee1` in the `else` block | MuteAmplifier.sol | 1 |
 | L-10      | It is possible in theory that stakes get locked due to call to `LockTo` with very small reward amount | MuteAmplifier.sol | 1 |
+| L-11      | Check for each fee token individually that non-zero value is transferred | MuteAmplifier.sol | 1 |
 | N-01      | Remove `require` statements that are always true | dMute.sol | 2 |
 | N-02      | Remove `SafeMath` library | - | 3 |
 | N-03      | Event parameter names are messed up | MuteBond.sol | - |
@@ -307,6 +308,72 @@ index 9c6fcb5..37adc7f 100644
 ```
 
 In case rewards are `<= 52 Wei` they will be lost. But they are worthless anyway.  
+
+## [L-11] Check for each fee token individually that non-zero value is transferred
+The `MuteAmplifier` contract executes the following code when fee tokens are transferred:  
+
+[Link](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L258-L260)  
+```solidity
+if ((fee0 > 0 || fee1 > 0) && fee0 <= totalFees0 && fee1 <= totalFees1) {
+    address(IMuteSwitchPairDynamic(lpToken).token0()).safeTransfer(msg.sender, fee0);
+    address(IMuteSwitchPairDynamic(lpToken).token1()).safeTransfer(msg.sender, fee1);
+```
+
+So when one of the fee tokens has a value that is greater 0, both fee tokens are transferred. This means that it is possible for a transfer to occur with the zero value.  
+
+There exist tokens that revert on zero-value transfer. Also the upstream contract that transfers the fee tokens to the `MuteAmplifier` contract checks for each token individually that the amount is greater zero:  
+
+[Link](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dynamic/MuteSwitchFeeVault.sol#L27-L31)  
+```solidity
+function claimFeesFor(address recipient, uint amount0, uint amount1) external {
+    require(msg.sender == pair);
+    if (amount0 > 0) _safeTransfer(token0, recipient, amount0);
+    if (amount1 > 0) _safeTransfer(token1, recipient, amount1);
+}
+```
+
+Therefore I recommend to check in the `MuteAmplifier` contract the value for each token individually as well.  
+
+Fix:  
+```diff
+diff --git a/contracts/amplifier/MuteAmplifier.sol b/contracts/amplifier/MuteAmplifier.sol
+index 9c6fcb5..42b4ec2 100644
+--- a/contracts/amplifier/MuteAmplifier.sol
++++ b/contracts/amplifier/MuteAmplifier.sol
+@@ -256,8 +256,8 @@ contract MuteAmplifier is Ownable{
+ 
+         // payout fee0 fee1
+         if ((fee0 > 0 || fee1 > 0) && fee0 <= totalFees0 && fee1 <= totalFees1) {
+-            address(IMuteSwitchPairDynamic(lpToken).token0()).safeTransfer(msg.sender, fee0);
+-            address(IMuteSwitchPairDynamic(lpToken).token1()).safeTransfer(msg.sender, fee1);
++            if (fee0 > 0) address(IMuteSwitchPairDynamic(lpToken).token0()).safeTransfer(msg.sender, fee0);
++            if (fee1 > 0) address(IMuteSwitchPairDynamic(lpToken).token1()).safeTransfer(msg.sender, fee1);
+ 
+             totalClaimedFees0 = totalClaimedFees0.add(fee0);
+             totalClaimedFees1 = totalClaimedFees1.add(fee1);
+@@ -296,8 +296,8 @@ contract MuteAmplifier is Ownable{
+ 
+         // payout fee0 fee1
+         if ((fee0 > 0 || fee1 > 0) && fee0 <= totalFees0 && fee1 <= totalFees1) {
+-            address(IMuteSwitchPairDynamic(lpToken).token0()).safeTransfer(msg.sender, fee0);
+-            address(IMuteSwitchPairDynamic(lpToken).token1()).safeTransfer(msg.sender, fee1);
++            if (fee0 > 0) address(IMuteSwitchPairDynamic(lpToken).token0()).safeTransfer(msg.sender, fee0);
++            if (fee1 > 0) address(IMuteSwitchPairDynamic(lpToken).token1()).safeTransfer(msg.sender, fee1);
+ 
+             totalClaimedFees0 = totalClaimedFees0.add(fee0);
+             totalClaimedFees1 = totalClaimedFees1.add(fee1);
+@@ -332,8 +332,8 @@ contract MuteAmplifier is Ownable{
+ 
+             // payout fee0 fee1
+             if ((fee0 > 0 || fee1 > 0) && fee0 <= totalFees0 && fee1 <= totalFees1) {
+-                address(IMuteSwitchPairDynamic(lpToken).token0()).safeTransfer(account, fee0);
+-                address(IMuteSwitchPairDynamic(lpToken).token1()).safeTransfer(account, fee1);
++                if (fee0 > 0) address(IMuteSwitchPairDynamic(lpToken).token0()).safeTransfer(account, fee0);
++                if (fee1 > 0) address(IMuteSwitchPairDynamic(lpToken).token1()).safeTransfer(account, fee1);
+ 
+                 totalClaimedFees0 = totalClaimedFees0.add(fee0);
+                 totalClaimedFees1 = totalClaimedFees1.add(fee1);
+```
 
 ## [N-01] Remove `require` statements that are always true
 The following two `require` statements always pass:  
