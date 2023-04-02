@@ -11,6 +11,7 @@
 | L-07      | First user that stakes again after a period without stakers receives too many rewards | MuteAmplifier.sol | 1 |
 | L-08      | `dripInfo` function reverts when `firstStakeTime >= endTime` | MuteAmplifier.sol | 1 |
 | L-09      | `dripInfo` function does not calculate `fee0` and `fee1` in the `else` block | MuteAmplifier.sol | 1 |
+| L-10      | It is possible in theory that stakes get locked due to call to `LockTo` with very small reward amount | MuteAmplifier.sol | 1 |
 | N-01      | Remove `require` statements that are always true | dMute.sol | 2 |
 | N-02      | Remove `SafeMath` library | - | 3 |
 | N-03      | Event parameter names are messed up | MuteBond.sol | - |
@@ -234,6 +235,78 @@ index 9c6fcb5..20974b8 100644
  
      }
 ```
+
+## [L-10] It is possible in theory that stakes get locked due to call to `LockTo` with very small reward amount
+I pointed out and explained in my report `#7 MuteBond.sol: deposit function reverts if remaining payout is very small due to >0 check in dMute.LockTo function` how the `MuteBond.LockTo` function reverts when it is called with an amount `<= 52 Wei`.  
+
+While in the `MuteBond` contract an attacker can actively make this situation occur and cause a temporary DOS, this is not possible in the `MuteAmplifier` contract.  
+
+The `MuteAmplifier` contract makes two calls to `MuteBond.LockTo`:  
+
+[Link](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L245-L255)  
+```solidity
+if (reward > 0) {
+    uint256 week_time = 60 * 60 * 24 * 7;
+    IDMute(dToken).LockTo(reward, week_time ,msg.sender);
+
+
+    userClaimedRewards[msg.sender] = userClaimedRewards[msg.sender].add(
+        reward
+    );
+    totalClaimedRewards = totalClaimedRewards.add(reward);
+
+
+    emit Payout(msg.sender, reward, remainder);
+}
+```
+
+[Link](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L287-L295)  
+```solidity
+if (reward > 0) {
+    uint256 week_time = 1 weeks;
+    IDMute(dToken).LockTo(reward, week_time ,msg.sender);
+
+
+    userClaimedRewards[msg.sender] = userClaimedRewards[msg.sender].add(
+        reward
+    );
+    totalClaimedRewards = totalClaimedRewards.add(reward);
+}
+```
+
+In theory there exists the possibility that the rewards that are paid out to a user are `> 0 Wei` and `<= 52 Wei`.  
+
+If at the `endTime` this is the case, the rewards will not increase anymore, making it impossible for the staker to withdraw his staked funds, which results in a complete loss of funds.  
+
+However with any reasonable value of `totalRewards` this is not going to occur. Actually it's a real challenge to make the contract output a reward of `> 0 Wei` and `<= 52 Wei`.  
+
+It might be beneficial to implement the following changes just to be safe:  
+
+```diff
+diff --git a/contracts/amplifier/MuteAmplifier.sol b/contracts/amplifier/MuteAmplifier.sol
+index 9c6fcb5..37adc7f 100644
+--- a/contracts/amplifier/MuteAmplifier.sol
++++ b/contracts/amplifier/MuteAmplifier.sol
+@@ -242,7 +242,7 @@ contract MuteAmplifier is Ownable{
+           IERC20(muteToken).transfer(treasury, remainder);
+         }
+         // payout rewards
+-        if (reward > 0) {
++        if (reward > 52) {
+             uint256 week_time = 60 * 60 * 24 * 7;
+             IDMute(dToken).LockTo(reward, week_time ,msg.sender);
+ 
+@@ -284,7 +284,7 @@ contract MuteAmplifier is Ownable{
+           IERC20(muteToken).transfer(treasury, remainder);
+         }
+         // payout rewards
+-        if (reward > 0) {
++        if (reward > 52) {
+             uint256 week_time = 1 weeks;
+             IDMute(dToken).LockTo(reward, week_time ,msg.sender);
+```
+
+In case rewards are `<= 52 Wei` they will be lost. But they are worthless anyway.  
 
 ## [N-01] Remove `require` statements that are always true
 The following two `require` statements always pass:  
