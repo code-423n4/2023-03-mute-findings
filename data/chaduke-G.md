@@ -81,3 +81,24 @@ G11. One can retrieve the value from ``info.totalLP`` to save gas:
 - uint256 totalCurrentStake = totalStake();
 +  uint256 totalCurrentStake = info.totalLP;
 ```
+
+G12. We can save gas by avoid using index ``i-1``, use ``i`` instead. Note that we know ``_userLocks[msg.sender].length > 0`` for sure otherwise the function would have reverted earlier.
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L112-L120](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/dao/dMute.sol#L112-L120)
+
+```diff
+-  for(uint256 i = _userLocks[msg.sender].length; i > 0; i--){
++  for(unchecked{uint256 i = _userLocks[msg.sender].length-1}; ; unchecked{i--}){
+-          UserLockInfo memory lock_info = _userLocks[msg.sender][i - 1];
++          UserLockInfo memory lock_info = _userLocks[msg.sender][i];
+
+
+          // recently redeemed lock, destroy it
+          if(lock_info.time == 0){
+-            _userLocks[msg.sender][i - 1] = _userLocks[msg.sender][_userLocks[msg.sender].length - 1];
+-            _userLocks[msg.sender][i] = _userLocks[msg.sender][_userLocks[msg.sender].length - 1];
+            _userLocks[msg.sender].pop();
+          }
++         if(i == 0) break;
+        }
+```
