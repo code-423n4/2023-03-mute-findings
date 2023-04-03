@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "hansfriese",
+  "risk": "2",
+  "title": "`dripsInfo` is not correct when there is no deposit",
+  "issueId": 39,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/39"
+}
