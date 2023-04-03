@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "evan",
+  "risk": "2",
+  "title": "An edge case in amplifier allows user to stake after end time, causing reward to be locked in the contract",
+  "issueId": 23,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/23"
+}
