@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "0xA5DF",
+  "risk": "2",
+  "title": "Owner lowering max payout might break the MuteBonds contract",
+  "issueId": 26,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/26"
+}
