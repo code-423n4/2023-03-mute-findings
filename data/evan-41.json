@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "evan",
+  "risk": "2",
+  "title": "Award is still distributed when there aren't any stakers, allowing users to get reward without staking",
+  "issueId": 41,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/41"
+}
