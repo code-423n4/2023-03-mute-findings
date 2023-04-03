@@ -39,7 +39,7 @@ G7. There is no need for the if-condition since it is always be true due to the 
 
 [https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L233-L237](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L233-L237)
 
-G8. This safety check can be eliminated since we can infer ``epochStart <= block.timestamp`` will always be true. 
+G8. This safety check can be eliminated since we can infer ``epochStart <= block.timestamp`` will always be true. This is because each time we will only add 5% of the ``timeElapsed`` to ``epochStart``. as a result, ``epochStart`` will be approaching near ``block.timestamp`` but will never exceed it.
 
 [https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L189-L190](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/bonds/MuteBond.sol#L189-L190)
 
