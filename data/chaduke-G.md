@@ -102,3 +102,8 @@ G12. We can save gas by avoid using index ``i-1``, use ``i`` instead. Note that 
 +         if(i == 0) break;
         }
 ```
+
+G13. ``startTime == 0`` has to be true since there is no other places that assign a value to it. No check is needed, the line can be eliminated.
+
+[https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L161](https://github.com/code-423n4/2023-03-mute/blob/4d8b13add2907b17ac14627cfa04e0c3cc9a2bed/contracts/amplifier/MuteAmplifier.sol#L161)
+
