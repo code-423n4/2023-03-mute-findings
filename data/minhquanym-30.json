@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "minhquanym",
+  "risk": "2",
+  "title": "Params of Lien struct are not emitted when lien is created making it difficult to track",
+  "issueId": 30,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/30"
+}
