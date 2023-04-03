@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "0xA5DF",
+  "risk": "2",
+  "title": "A user can 'borrow' dMute balance for a single block to increase their amplifier APY",
+  "issueId": 36,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/36"
+}
