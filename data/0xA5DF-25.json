@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "0xA5DF",
+  "risk": "3",
+  "title": "Bond max-buyer might end up buying the max buy of the next epoch",
+  "issueId": 25,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/25"
+}
