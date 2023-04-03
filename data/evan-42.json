@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "evan",
+  "risk": "2",
+  "title": "Logic for RescueTokens is incorrect for muteTokens",
+  "issueId": 42,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/42"
+}
