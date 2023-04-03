@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "evan",
+  "risk": "2",
+  "title": "MuteBond is susceptible to DOS",
+  "issueId": 22,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/22"
+}
