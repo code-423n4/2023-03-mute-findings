@@ -1,0 +1,8 @@
+{
+  "contest": 227,
+  "handle": "minhquanym",
+  "risk": "3",
+  "title": "Function `takeBid()` allows attacker to sell any collateral NFT that deposited through function `borrowToBuy()`",
+  "issueId": 29,
+  "issueUrl": "https://github.com/code-423n4/2023-03-mute-findings/issues/29"
+}
