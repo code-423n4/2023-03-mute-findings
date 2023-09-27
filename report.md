@@ -13,13 +13,13 @@ contest: 227
 
 Code4rena (C4) is an open organization consisting of security researchers, auditors, developers, and individuals with domain expertise in smart contracts.
 
-A C4 audit contest is an event in which community participants, referred to as Wardens, review, audit, or analyze smart contract logic in exchange for a bounty provided by sponsoring projects.
+A C4 audit is an event in which community participants, referred to as Wardens, review, audit, or analyze smart contract logic in exchange for a bounty provided by sponsoring projects.
 
-During the audit contest outlined in this document, C4 conducted an analysis of the Mute Switch smart contract system written in Solidity. The audit contest took place between March 28—April 3 2023.
+During the audit outlined in this document, C4 conducted an analysis of the Mute Switch smart contract system written in Solidity. The audit took place between March 28—April 3 2023.
 
 ## Wardens
 
-In Code4rena's Versus contests, the competition is limited to a small group of wardens; for this contest, 5 wardens contributed reports:
+In Code4rena's Invitational audits, the competition is limited to a small group of wardens; for this audit, 5 wardens contributed reports:
 
   1. 0xA5DF
   2. HollaDieWaldfee
@@ -27,7 +27,7 @@ In Code4rena's Versus contests, the competition is limited to a small group of w
   4. evan
   5. [hansfriese](https://twitter.com/hansfriese)
 
-This contest was judged by [Picodes](https://twitter.com/thePicodes).
+This audit was judged by [Picodes](https://twitter.com/thePicodes).
 
 Final report assembled by [liveactionllama](https://twitter.com/liveactionllama).
 
@@ -41,7 +41,7 @@ All of the issues presented here are linked back to their original finding.
 
 # Scope
 
-The code under review can be found within the [C4 Mute Switch - Versus contest repository](https://github.com/code-423n4/2023-03-mute), and is composed of 3 smart contracts written in the Solidity programming language and includes 535 lines of Solidity code.
+The code under review can be found within the [C4 Mute Switch audit repository](https://github.com/code-423n4/2023-03-mute), and is composed of 3 smart contracts written in the Solidity programming language and includes 535 lines of Solidity code.
 
 # Severity Criteria
 
@@ -119,7 +119,7 @@ Side note: this is similar to another bug I've reported regarding getting a lowe
 ***
 
 ## [[H-02] Attacker can front-run Bond buyer and make them buy it for a lower payout than expected](https://github.com/code-423n4/2023-03-mute-findings/issues/24)
-*Submitted by [0xA5DF](https://github.com/code-423n4/2023-03-mute-findings/issues/24), also found by [HollaDieWaldfee](https://github.com/code-423n4/2023-03-mute-findings/issues/45), [chaduke](https://github.com/code-423n4/2023-03-mute-findings/issues/16), [chaduke](https://github.com/code-423n4/2023-03-mute-findings/issues/15), [chaduke](https://github.com/code-423n4/2023-03-mute-findings/issues/12), and [HollaDieWaldfee](https://github.com/code-423n4/2023-03-mute-findings/issues/9)*
+*Submitted by [0xA5DF](https://github.com/code-423n4/2023-03-mute-findings/issues/24), also found by HollaDieWaldfee ([1](https://github.com/code-423n4/2023-03-mute-findings/issues/45), [2](https://github.com/code-423n4/2023-03-mute-findings/issues/9)) and chaduke ([1](https://github.com/code-423n4/2023-03-mute-findings/issues/16), [2](https://github.com/code-423n4/2023-03-mute-findings/issues/15), [3](https://github.com/code-423n4/2023-03-mute-findings/issues/12))*
 
 The `MuteBond` contract contains a feature in which after each purchase the `epochStart` increases by 5% of the time passed since `epochStart`, this (in most cases) lowers the bond's price (i.e. buyer gets less payout) for future purchases.
 
@@ -662,7 +662,7 @@ The require shouldn't be inside the else block.
 ***
 
 ## [[M-05] MuteBond is susceptible to DOS](https://github.com/code-423n4/2023-03-mute-findings/issues/22)
-*Submitted by [evan](https://github.com/code-423n4/2023-03-mute-findings/issues/22), also found by [HollaDieWaldfee](https://github.com/code-423n4/2023-03-mute-findings/issues/48) and [HollaDieWaldfee](https://github.com/code-423n4/2023-03-mute-findings/issues/7)*
+*Submitted by [evan](https://github.com/code-423n4/2023-03-mute-findings/issues/22), also found by HollaDieWaldfee ([1](https://github.com/code-423n4/2023-03-mute-findings/issues/48), [2](https://github.com/code-423n4/2023-03-mute-findings/issues/7))*
 
 <https://github.com/code-423n4/2023-03-mute/blob/main/contracts/bonds/MuteBond.sol#L179><br>
 <https://github.com/code-423n4/2023-03-mute/blob/main/contracts/dao/dMute.sol#L75-L77><br>
@@ -1350,7 +1350,7 @@ index 96ee755..4af01d7 100644
 
 # Low Risk and Non-Critical Issues
 
-For this contest, 5 reports were submitted by wardens detailing low risk and non-critical issues. The [report highlighted below](https://github.com/code-423n4/2023-03-mute-findings/issues/17) by **HollaDieWaldfee** received the top score from the judge.
+For this audit, 5 reports were submitted by wardens detailing low risk and non-critical issues. The [report highlighted below](https://github.com/code-423n4/2023-03-mute-findings/issues/17) by **HollaDieWaldfee** received the top score from the judge.
 
 *The following wardens also submitted reports: [evan](https://github.com/code-423n4/2023-03-mute-findings/issues/44), [0xA5DF](https://github.com/code-423n4/2023-03-mute-findings/issues/40), [hansfriese](https://github.com/code-423n4/2023-03-mute-findings/issues/38), and [chaduke](https://github.com/code-423n4/2023-03-mute-findings/issues/5).*
 
@@ -1718,7 +1718,7 @@ There are edge cases where the current check would apply, e.g. when staking occu
 
 # Gas Optimizations
 
-For this contest, 3 reports were submitted by wardens detailing gas optimizations. The [report highlighted below](https://github.com/code-423n4/2023-03-mute-findings/issues/31) by **0xA5DF** received the top score from the judge.
+For this audit, 3 reports were submitted by wardens detailing gas optimizations. The [report highlighted below](https://github.com/code-423n4/2023-03-mute-findings/issues/31) by **0xA5DF** received the top score from the judge.
 
 *The following wardens also submitted reports: [evan](https://github.com/code-423n4/2023-03-mute-findings/issues/43) and [chaduke](https://github.com/code-423n4/2023-03-mute-findings/issues/2).*
 
@@ -1865,6 +1865,6 @@ Instead, just make sure all multiplications are done before division, that will 
 
 C4 is an open organization governed by participants in the community.
 
-C4 Contests incentivize the discovery of exploits, vulnerabilities, and bugs in smart contracts. Security researchers are rewarded at an increasing rate for finding higher-risk issues. Contest submissions are judged by a knowledgeable security researcher and solidity developer and disclosed to sponsoring developers. C4 does not conduct formal verification regarding the provided code but instead provides final verification.
+C4 Audits incentivize the discovery of exploits, vulnerabilities, and bugs in smart contracts. Security researchers are rewarded at an increasing rate for finding higher-risk issues. Audit submissions are judged by a knowledgeable security researcher and solidity developer and disclosed to sponsoring developers. C4 does not conduct formal verification regarding the provided code but instead provides final verification.
 
 C4 does not provide any guarantee or warranty regarding the security of this project. All smart contract software should be used at the sole risk and responsibility of users.
